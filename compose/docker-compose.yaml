@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  laravel:
+    platform: linux/amd64
+    image: test-php-otel:latest
+    ports:
+     - "80:9000"
+    environment:
+      OTEL_PHP_LOG_DESTINATION: stderr
+      OTEL_PHP_AUTOLOAD_ENABLED: "true"
+      # OTEL_PHP_RESOURCE_DETECTORS="env,host,sdk,sdk_provided"
+      OTEL_PHP_RESOURCE_DETECTORS: "all"
+      OTEL_PROPAGATORS: baggage,tracecontext
+      OTEL_EXPORTER_OTLP_TIMEOUT: "10000"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel:4317"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_LOG_LEVEL: "debug"
+      OTEL_TRACES_SAMPLER: "always_on"
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      # console | otlp
+      OTEL_TRACES_EXPORTER: otlp
+    depends_on:
+      - otel
+  otel:
+    platform: linux/amd64
+    image: otel/opentelemetry-collector-contrib
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension
