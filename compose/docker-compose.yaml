@@ -2,7 +2,7 @@ version: "3.8"
 services:
   laravel:
     platform: linux/amd64
-    image: test-php-otel:latest
+    image: test-otel-php:latest
     ports:
      - "80:9000"
     environment:

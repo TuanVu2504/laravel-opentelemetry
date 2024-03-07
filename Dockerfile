@@ -14,7 +14,7 @@ FROM tuanvu2504/laravel-opentelemetry:latest as build
 USER www-data
 WORKDIR /var/www/html
 
-COPY --chown=www-data:www-data --from=deps vendor .
+COPY --chown=www-data:www-data --from=deps vendor ./vendor
 COPY --chown=www-data:www-data . .
 RUN chmod +x entrypoint.sh
 
