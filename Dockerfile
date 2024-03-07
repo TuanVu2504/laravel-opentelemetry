@@ -10,8 +10,7 @@ RUN composer install --no-dev \
         --prefer-dist \
         --ignore-platform-reqs \
         --no-autoloader \
-        --no-progress \
-        --no-scripts
+        --no-progress
 RUN composer dump-autoload --optimize --apcu --no-dev
 RUN chmod +x entrypoint.sh
 
