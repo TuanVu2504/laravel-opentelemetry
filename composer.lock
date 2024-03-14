@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bcc25a9b2a131040c8b9c5498f59dda7",
+    "content-hash": "251a17b9e5b3aa0126b4f78a2b36f947",
     "packages": [
         {
             "name": "brick/math",
@@ -2722,6 +2722,67 @@
                 "source": "https://github.com/open-telemetry/opentelemetry-php"
             },
             "time": "2024-01-13T05:50:44+00:00"
+        },
+        {
+            "name": "open-telemetry/context-swoole",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opentelemetry-php/context-swoole.git",
+                "reference": "035964527dcbcfa0f63136d4eeb6951b1027ef68"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opentelemetry-php/context-swoole/zipball/035964527dcbcfa0f63136d4eeb6951b1027ef68",
+                "reference": "035964527dcbcfa0f63136d4eeb6951b1027ef68",
+                "shasum": ""
+            },
+            "require": {
+                "open-telemetry/context": "^1.0",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3",
+                "nyholm/psr7": "*",
+                "open-telemetry/sdk": "^1.0",
+                "phan/phan": "^5.0",
+                "php-http/mock-client": "*",
+                "phpstan/phpstan": "^1.1",
+                "phpstan/phpstan-phpunit": "^1.0",
+                "phpunit/phpunit": "^9.5",
+                "psalm/plugin-phpunit": "^0.16",
+                "vimeo/psalm": "^4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "OpenTelemetry\\Contrib\\Context\\Swoole\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "opentelemetry-php contributors",
+                    "homepage": "https://github.com/open-telemetry/opentelemetry-php/graphs/contributors"
+                }
+            ],
+            "description": "Async Swoole/OpenSwoole context implementation for OpenTelemetry PHP.",
+            "keywords": [
+                "Context",
+                "contrib",
+                "coroutine",
+                "openswoole",
+                "opentelemetry",
+                "otel",
+                "swoole"
+            ],
+            "support": {
+                "source": "https://github.com/opentelemetry-php/context-swoole/tree/1.0.1"
+            },
+            "time": "2023-11-10T03:31:39+00:00"
         },
         {
             "name": "open-telemetry/exporter-otlp",

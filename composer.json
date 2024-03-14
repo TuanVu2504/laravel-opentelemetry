@@ -13,6 +13,7 @@
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
         "open-telemetry/api": "1.0.3",
+        "open-telemetry/context-swoole": "^1.0",
         "open-telemetry/exporter-otlp": "1.0.3",
         "open-telemetry/opentelemetry-auto-laravel": "0.0.22",
         "open-telemetry/opentelemetry-auto-psr15": "^1.0",
