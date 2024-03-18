@@ -3,6 +3,29 @@
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\HttpFactory;
+use OpenTelemetry\API\Trace\Span;
+use OpenTelemetry\API\Trace\StatusCode;
+use OpenTelemetry\API\Trace\TracerInterface;
+use OpenTelemetry\Contrib\Zipkin\Exporter as ZipkinExporter;
+use OpenTelemetry\SDK\Common\Export\Http\PsrTransportFactory;
+use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
+use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor;
+use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
+use OpenTelemetry\SDK\Trace\TracerProvider;
+
+use OpenTelemetry\API\Globals;
+use OpenTelemetry\API\Instrumentation\Configurator;
+use OpenTelemetry\API\Trace\SpanKind;
+use OpenTelemetry\Context\Context;
+use OpenTelemetry\Context\ContextStorage;
+use OpenTelemetry\Contrib\Context\Swoole\SwooleContextStorage;
+use OpenTelemetry\Contrib\Grpc\GrpcTransportFactory;
+use OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory;
+use OpenTelemetry\Contrib\Otlp\SpanExporter;
+
+
 define('LARAVEL_START', microtime(true));
 
 /*
@@ -44,6 +67,27 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
+$httpClient = new Client();
+$httpFactory = new HttpFactory();
+
+
+$transport = (new GrpcTransportFactory())->create('http://127.0.0.1:4317/v1/traces');
+$exporter = new SpanExporter($transport);
+$spanProcessor = new SimpleSpanProcessor($exporter);
+$tracerProvider = new TracerProvider($spanProcessor);
+
+$tracer = Globals::tracerProvider()->getTracer('io.opentelemetry.contrib.swoole.php');
+// $tracer = $tracerProvider->getTracer('Hello World Laravel Web Server');
+
+// Use Swoole context storage
+Context::setStorage(new SwooleContextStorage(new ContextStorage()));
+Globals::registerInitializer(fn (Configurator $configurator) => $configurator->withTracerProvider($tracerProvider));
+
+$request = Request::capture();
+$span = $tracer->spanBuilder($request->url())->startSpan();
+$spanScope = $span->activate();
+
+
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $kernel = $app->make(Kernel::class);
@@ -53,3 +97,6 @@ $response = $kernel->handle(
 )->send();
 
 $kernel->terminate($request, $response);
+
+$span->end();
+$spanScope->detach();
