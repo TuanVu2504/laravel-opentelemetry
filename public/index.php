@@ -3,6 +3,8 @@
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Log;
+
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use OpenTelemetry\API\Trace\Span;
@@ -10,8 +12,6 @@ use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\API\Trace\TracerInterface;
 use OpenTelemetry\Contrib\Zipkin\Exporter as ZipkinExporter;
 use OpenTelemetry\SDK\Common\Export\Http\PsrTransportFactory;
-use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
-use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor;
 use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
 use OpenTelemetry\SDK\Trace\TracerProvider;
 
@@ -22,6 +22,8 @@ use OpenTelemetry\Context\Context;
 use OpenTelemetry\Context\ContextStorage;
 use OpenTelemetry\Contrib\Context\Swoole\SwooleContextStorage;
 use OpenTelemetry\Contrib\Grpc\GrpcTransportFactory;
+use OpenTelemetry\Contrib\Otlp\OtlpUtil;
+use OpenTelemetry\API\Signals;
 use OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory;
 use OpenTelemetry\Contrib\Otlp\SpanExporter;
 
@@ -67,21 +69,23 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
+Log::info("Run 1");
 $httpClient = new Client();
 $httpFactory = new HttpFactory();
 
-
-$transport = (new GrpcTransportFactory())->create('http://127.0.0.1:4317/v1/traces');
+$transport = (new GrpcTransportFactory())
+    ->create(
+                env('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://otel:4317') . OtlpUtil::method(Signals::TRACE)
+            );
 $exporter = new SpanExporter($transport);
 $spanProcessor = new SimpleSpanProcessor($exporter);
 $tracerProvider = new TracerProvider($spanProcessor);
 
-$tracer = Globals::tracerProvider()->getTracer('io.opentelemetry.contrib.swoole.php');
-// $tracer = $tracerProvider->getTracer('Hello World Laravel Web Server');
-
 // Use Swoole context storage
 Context::setStorage(new SwooleContextStorage(new ContextStorage()));
 Globals::registerInitializer(fn (Configurator $configurator) => $configurator->withTracerProvider($tracerProvider));
+
+$tracer = Globals::tracerProvider()->getTracer('Hello World Laravel Web Server');
 
 $request = Request::capture();
 $span = $tracer->spanBuilder($request->url())->startSpan();
@@ -89,14 +93,19 @@ $spanScope = $span->activate();
 
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
+Log::info("Run 2");
 
 $kernel = $app->make(Kernel::class);
+Log::info("Run 3");
 
 $response = $kernel->handle(
     $request = Request::capture()
 )->send();
+Log::info("Run 4");
 
 $kernel->terminate($request, $response);
+Log::info("Run 5");
 
 $span->end();
 $spanScope->detach();
+Log::info("Run 6");

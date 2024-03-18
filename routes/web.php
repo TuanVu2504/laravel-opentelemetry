@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\HelloController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,3 +23,5 @@ Route::get('/test', function() {
     Log::info('This is some useful information.');
     return view('welcome');
 });
+
+Route::get('/hello', [HelloController::class, 'index']);
