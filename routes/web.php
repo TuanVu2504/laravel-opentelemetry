@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\TelemetryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,5 +21,8 @@ Route::get('/', function () {
 
 Route::get('/test', function() {
     Log::info('This is some useful information.');
-    return view('welcome');
+    return "test route";
 });
+
+
+Route::get('/telemetry', [ TelemetryController::class, 'index' ]);

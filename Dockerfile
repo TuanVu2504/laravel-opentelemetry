@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1
-FROM tuanvu2504/laravel-opentelemetry:latest as build
+FROM tuanvu2504/laravel-opentelemetry:swoole as build
 USER www-data
 WORKDIR /var/www/html
 
 COPY --chown=www-data:www-data . .
-COPY --from=composer:2.7.1 /usr/bin/composer /usr/bin/composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev \
         --no-interaction \
         --prefer-dist \
