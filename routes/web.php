@@ -20,5 +20,5 @@ Route::get('/', function () {
 
 Route::get('/test', function() {
     Log::info('This is some useful information.');
-    return view('welcome');
+    return "test Route"
 });
