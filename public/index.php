@@ -53,7 +53,7 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 require __DIR__.'/../vendor/autoload.php';
 
 // Use Swoole context storage
-Log::info("Otel instrumentation is enabled");
+Log::info('Otel instrumentation is enabled');
 Context::setStorage(new SwooleContextStorage(new ContextStorage()));
 Globals::registerInitializer(function (Configurator $configurator) {
     $transport = (new GrpcTransportFactory())->create(
