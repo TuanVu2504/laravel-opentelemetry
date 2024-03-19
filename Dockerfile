@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM tuanvu2504/laravel-opentelemetry:latest as build
+FROM tuanvu2504/laravel-opentelemetry:swoole as build
 USER www-data
 WORKDIR /var/www/html
 
