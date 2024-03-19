@@ -4,16 +4,11 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Log;
-
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
-use OpenTelemetry\API\Trace\Span;
-use OpenTelemetry\API\Trace\StatusCode;
-use OpenTelemetry\API\Trace\TracerInterface;
-use OpenTelemetry\Contrib\Zipkin\Exporter as ZipkinExporter;
-use OpenTelemetry\SDK\Common\Export\Http\PsrTransportFactory;
+use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
+use OpenTelemetry\SDK\Common\Util\ShutdownHandler;
+use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
+use OpenTelemetry\SDK\Trace\Sampler\ParentBased;
 use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
-use OpenTelemetry\SDK\Trace\TracerProvider;
 
 use OpenTelemetry\API\Globals;
 use OpenTelemetry\API\Instrumentation\Configurator;
@@ -24,9 +19,8 @@ use OpenTelemetry\Contrib\Context\Swoole\SwooleContextStorage;
 use OpenTelemetry\Contrib\Grpc\GrpcTransportFactory;
 use OpenTelemetry\Contrib\Otlp\OtlpUtil;
 use OpenTelemetry\API\Signals;
-use OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory;
 use OpenTelemetry\Contrib\Otlp\SpanExporter;
-
+use OpenTelemetry\SDK\Trace\TracerProviderBuilder;
 
 define('LARAVEL_START', microtime(true));
 
@@ -58,6 +52,30 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 
 require __DIR__.'/../vendor/autoload.php';
 
+// Use Swoole context storage
+Log::info("Otel instrumentation is enabled");
+Context::setStorage(new SwooleContextStorage(new ContextStorage()));
+Globals::registerInitializer(function (Configurator $configurator) {
+    $transport = (new GrpcTransportFactory())->create(
+        env('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://otel:4317') . OtlpUtil::method(Signals::TRACE)
+    );
+    $exporter = new SpanExporter($transport);
+    $spanProcessor = new SimpleSpanProcessor($exporter);
+
+    $propagator = TraceContextPropagator::getInstance();
+    $tracerProvider = (new TracerProviderBuilder())
+        ->addSpanProcessor($spanProcessor)
+        ->setSampler(new ParentBased(new AlwaysOnSampler()))
+        ->build();
+    
+    ShutdownHandler::register([$tracerProvider, 'shutdown']);
+
+    return $configurator
+            ->withTracerProvider($tracerProvider)
+            ->withPropagator($propagator);
+
+});
+
 /*
 |--------------------------------------------------------------------------
 | Run The Application
@@ -68,10 +86,6 @@ require __DIR__.'/../vendor/autoload.php';
 | to this client's browser, allowing them to enjoy our application.
 |
 */
-
-Log::info("Run 1");
-$httpClient = new Client();
-$httpFactory = new HttpFactory();
 
 $transport = (new GrpcTransportFactory())
     ->create(

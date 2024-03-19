@@ -6,7 +6,7 @@ services:
     ports:
      - "80:9000"
     environment:
-      LOG_CHANNEL: stderr
+      OCTANE_SERVER: swoole
       OTEL_PHP_LOG_DESTINATION: stderr
       # OTEL_PHP_AUTOLOAD_ENABLED: "false"
       # OTEL_PHP_RESOURCE_DETECTORS="env,host,sdk,sdk_provided"
@@ -21,9 +21,13 @@ services:
       OTEL_METRICS_EXPORTER: none
       # console | otlp
       OTEL_TRACES_EXPORTER: otlp
+    volumes:
+      - ./supervisor.conf:/var/www/html/docker/supervisor.conf
+
     depends_on:
-      - otel
-  otel:
+      otel:
+        condition: service_started
+  otel:      
     platform: linux/amd64
     image: otel/opentelemetry-collector-contrib
     volumes:
