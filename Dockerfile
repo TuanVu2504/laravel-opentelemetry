@@ -4,7 +4,7 @@ USER www-data
 WORKDIR /var/www/html
 
 COPY --chown=www-data:www-data . .
-COPY --from=composer:2.7.1 /usr/bin/composer /usr/bin/composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev \
         --no-interaction \
         --prefer-dist \
