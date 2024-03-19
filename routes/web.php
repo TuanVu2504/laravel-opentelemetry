@@ -19,10 +19,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/test', function() {
-    Log::info('This is some useful information.');
-    return "test route";
-});
-
-
+Route::get('/test', [ TelemetryController::class, 'index' ]);
 Route::get('/telemetry', [ TelemetryController::class, 'index' ]);
