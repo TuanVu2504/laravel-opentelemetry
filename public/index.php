@@ -87,39 +87,12 @@ Globals::registerInitializer(function (Configurator $configurator) {
 |
 */
 
-$transport = (new GrpcTransportFactory())
-    ->create(
-                env('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://otel:4317') . OtlpUtil::method(Signals::TRACE)
-            );
-$exporter = new SpanExporter($transport);
-$spanProcessor = new SimpleSpanProcessor($exporter);
-$tracerProvider = new TracerProvider($spanProcessor);
-
-// Use Swoole context storage
-Context::setStorage(new SwooleContextStorage(new ContextStorage()));
-Globals::registerInitializer(fn (Configurator $configurator) => $configurator->withTracerProvider($tracerProvider));
-
-$tracer = Globals::tracerProvider()->getTracer('Hello World Laravel Web Server');
-
-$request = Request::capture();
-$span = $tracer->spanBuilder($request->url())->startSpan();
-$spanScope = $span->activate();
-
-
 $app = require_once __DIR__.'/../bootstrap/app.php';
-Log::info("Run 2");
 
 $kernel = $app->make(Kernel::class);
-Log::info("Run 3");
 
 $response = $kernel->handle(
     $request = Request::capture()
 )->send();
-Log::info("Run 4");
 
 $kernel->terminate($request, $response);
-Log::info("Run 5");
-
-$span->end();
-$spanScope->detach();
-Log::info("Run 6");
