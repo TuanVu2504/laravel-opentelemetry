@@ -10,7 +10,7 @@ services:
       LOG_CHANNEL: stderr
       OCTANE_SERVER: swoole
       OTEL_PHP_LOG_DESTINATION: stderr
-      OTEL_PHP_AUTOLOAD_ENABLED: "true"
+      OTEL_PHP_AUTOLOAD_ENABLED: "false"
       # OTEL_PHP_RESOURCE_DETECTORS="env,host,sdk,sdk_provided"
       OTEL_PHP_RESOURCE_DETECTORS: "all"
       OTEL_PROPAGATORS: baggage,tracecontext
