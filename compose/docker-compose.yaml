@@ -15,16 +15,31 @@ services:
       OTEL_PHP_RESOURCE_DETECTORS: "all"
       OTEL_PROPAGATORS: baggage,tracecontext
       OTEL_EXPORTER_OTLP_TIMEOUT: "10000"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel:4317"
-      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel:4318"
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PHP_TRACES_PROCESSOR: simple
       OTEL_LOG_LEVEL: "debug"
       OTEL_TRACES_SAMPLER: "always_on"
       OTEL_LOGS_EXPORTER: none
       OTEL_METRICS_EXPORTER: none
       # console | otlp
       OTEL_TRACES_EXPORTER: otlp
+    entrypoint:
+      - sh 
+      - -c 
+      - |
+        #/bin/sh
+        mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache
+        php artisan optimize:clear;
+        php artisan package:discover --ansi;
+        php artisan event:cache;
+        php artisan config:cache;
+        php artisan route:cache;
+        exec /usr/bin/supervisord -c docker/supervisor.conf
+
     volumes:
       - ./supervisor.conf:/var/www/html/docker/supervisor.conf
+      - ../:/var/www/html/ 
 
     depends_on:
       otel:

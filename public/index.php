@@ -3,22 +3,6 @@
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
-// use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
-use OpenTelemetry\SDK\Common\Util\ShutdownHandler;
-use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
-
-use OpenTelemetry\API\Globals;
-use OpenTelemetry\API\Instrumentation\Configurator;
-use OpenTelemetry\Context\Context;
-use OpenTelemetry\Context\ContextStorage;
-use OpenTelemetry\Contrib\Context\Swoole\SwooleContextStorage;
-use OpenTelemetry\Contrib\Grpc\GrpcTransportFactory;
-use OpenTelemetry\Contrib\Otlp\OtlpUtil;
-use OpenTelemetry\API\Signals;
-use OpenTelemetry\Contrib\Otlp\SpanExporter;
-use OpenTelemetry\SDK\Trace\TracerProvider;
-use OpenTelemetry\SDK\Trace\TracerProviderBuilder;
-
 define('LARAVEL_START', microtime(true));
 
 /*
@@ -49,29 +33,29 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 
 require __DIR__.'/../vendor/autoload.php';
 
-// Use Swoole context storage
-Context::setStorage(new SwooleContextStorage(new ContextStorage()));
-Globals::registerInitializer(function (Configurator $configurator) {
-    $transport = (new GrpcTransportFactory())->create(
-        env('OTEL_EXPORTER_OTLP_ENDPOINT') . OtlpUtil::method(Signals::TRACE)
-    );
-    $exporter = new SpanExporter($transport);
-    $spanProcessor = new SimpleSpanProcessor($exporter);
+// // Use Swoole context storage
+// Context::setStorage(new SwooleContextStorage(new ContextStorage()));
+// Globals::registerInitializer(function (Configurator $configurator) {
+//     $transport = (new GrpcTransportFactory())->create(
+//         env('OTEL_EXPORTER_OTLP_ENDPOINT') . OtlpUtil::method(Signals::TRACE)
+//     );
+//     $exporter = new SpanExporter($transport);
+//     $spanProcessor = new SimpleSpanProcessor($exporter);
 
-    // $propagator = TraceContextPropagator::getInstance();
-    $tracerProvider = new TracerProvider($spanProcessor);
-    // $tracerProvider = (new TracerProviderBuilder())
-    //     ->addSpanProcessor($spanProcessor)
-    //     ->setSampler(new ParentBased(new AlwaysOnSampler()))
-    //     ->build();
+//     // $propagator = TraceContextPropagator::getInstance();
+//     $tracerProvider = new TracerProvider($spanProcessor);
+//     // $tracerProvider = (new TracerProviderBuilder())
+//     //     ->addSpanProcessor($spanProcessor)
+//     //     ->setSampler(new ParentBased(new AlwaysOnSampler()))
+//     //     ->build();
     
-    ShutdownHandler::register([$tracerProvider, 'shutdown']);
+//     ShutdownHandler::register([$tracerProvider, 'shutdown']);
 
-    return $configurator
-            ->withTracerProvider($tracerProvider);
-            // ->withPropagator($propagator);
+//     return $configurator
+//             ->withTracerProvider($tracerProvider);
+//             // ->withPropagator($propagator);
 
-});
+// });
 
 /*
 |--------------------------------------------------------------------------
